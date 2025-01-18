@@ -26,7 +26,7 @@
         add .active to tframe
         remove .bg-zinc-700 from .appbtn
         add .bg-zinc-700 to #{'btn-'+frameid}
-        if framesrc is not '' and tframe.src is not framesrc
+        if framesrc is not '' and tframe.src is not framesrc and framesrc is not in tframe.src
             set tframe @src to framesrc
             remove .hidden from #{'status-'+frameid}
         end

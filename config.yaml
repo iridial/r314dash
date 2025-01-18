@@ -1,0 +1,57 @@
+settings:
+  port: 3000
+  # path: "/"
+  # hide_user_management: true
+  user_header_key: "X-User"
+  user_email_header_key: "X-User-Email"
+  user_fullname_header_key: "X-User-Fullname"
+  site_name: r314dash
+  # title: r314dash
+  sign_out_url: "/oauth2/sign_out"
+  settings_url: "/user/settings"
+  stats:
+    enabled: true
+    #enabled: false
+    backend_url: "http://127.0.0.1:9090/prometheus/api/v1/query"
+    refresh_interval: 5
+    warn_values: # TODO: warn values thresholds
+      cpu: 70
+      mem: 80
+    metrics:
+      - label: "net_receive"
+        query: "irate(node_network_receive_bytes_total[15s])" # /1024
+      - label: "net_transmit"
+        query: "irate(node_network_transmit_bytes_total[15s])" # /1024
+      - label: "cpu_usage"
+        query: 'avg without (mode,cpu) (1 - irate(node_cpu_seconds_total{mode="idle"}[1m]))*100'
+      # - label: "cpu_load1"
+      #   query: "node_load1"
+      - label: "cpu_load5"
+        query: "node_load5"
+      - label: "cpu_load15"
+        query: "node_load15"
+      - label: "mem_usage" # memory used percentage
+        query: "100-node_memory_MemAvailable_bytes/node_memory_MemTotal_bytes*100"
+      - label: "mem_total" # memory used percentage
+        query: "node_memory_MemTotal_bytes"
+      - label: "mem_free" # memory used percentage
+        query: "node_memory_MemAvailable_bytes"
+      - label: "mem_cache" # memory used percentage
+        query: "node_memory_Cached_bytes"
+
+# https://thehomelab.wiki/books/helpful-tools-resources/page/icons-for-self-hosted-dashboards
+# https://dashy.to/docs/icons/#home-lab-icons
+links:
+  - href: "http://localhost:8080/homer/"
+    icon: "https://raw.githubusercontent.com/NX211/homer-icons/refs/heads/master/png/homer.png"
+    title: "Homer Page"
+  - href: "http://localhost:8080/transmission/web/"
+    icon: "https://raw.githubusercontent.com/NX211/homer-icons/refs/heads/master/png/transmission.png"
+    title: "Transmission"
+  - href: "http://localhost:8080/glances/"
+    icon: "https://raw.githubusercontent.com/NX211/homer-icons/refs/heads/master/png/glances.png"
+    title: "Glances"
+  - href: "https://duckduckgo.com/"
+    icon: "https://raw.githubusercontent.com/NX211/homer-icons/refs/heads/master/png/duckduckgo.png"
+    title: "DUCC"
+    is_link: true

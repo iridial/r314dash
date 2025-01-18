@@ -1,0 +1,15 @@
+# Config file for air
+root = "."
+tmp_dir = "tmp"
+
+[build]
+bin = "tmp/main" # Path to the binary
+cmd = "go build -o tmp/main ." # Command to build the binary
+#cmd = "go build -o tmp/main.exe ." # Command to build the binary
+include_ext = ["go", "html", "yaml"] # File extensions to watch
+exclude_dir = ["tmp", "node_modules", "bin", "static"] # Directories to exclude
+
+[log]
+time_format = "2006-01-02 15:04:05"
+time_zone = "Local"
+#silent = true

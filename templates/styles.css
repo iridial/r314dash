@@ -6,4 +6,28 @@
     .btn {
         @apply transform active:scale-90 transition-transform;
     }
+
+    .appbtn {
+        @apply p-3 hover:bg-zinc-200 dark:hover:bg-zinc-600
+    }
+    .appbtnsel {
+        @apply bg-zinc-300 dark:bg-zinc-700
+    }
+    .active-app {
+        @apply absolute inline-block -translate-y-1/2 translate-x-7 p-1 rounded-full dark:bg-zinc-100 bg-zinc-500 text-xs
+    }
+    .controlbtn {
+        @apply hover:bg-zinc-200 dark:hover:bg-zinc-700
+    }
+    .text-muted{
+        @apply text-zinc-500
+    }
+    #homebtn.noui {
+        transition: transform .3s ease-out;
+        transform: translate(-1.6em, -1.6em);
+        @apply bg-zinc-300 dark:bg-zinc-800 rounded-br-xl
+    }
+    #homebtn.noui:hover {
+        transform: translate(0px, 0px);
+    }
 }

@@ -59,7 +59,7 @@ func LoadConfig() error {
 	}
 
 	for _, metric := range Main.Settings.Stats.Metrics {
-		if len(strings.Split(metric.Label, "_")) != 2 {
+		if l := len(strings.Split(metric.Label, "_")); l != 2 && l != 3 {
 			panic("Invalid metric label config: " + metric.Label)
 		}
 	}

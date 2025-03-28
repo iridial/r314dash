@@ -13,6 +13,7 @@ type MetricResponse struct {
 
 type MetricValue struct {
 	Value string `json:"value"`
+	Unit  string `json:"unit"`
 	Warn  bool   `json:"warn"`
 }
 
@@ -36,8 +37,21 @@ type MemoryMetrics struct {
 	Cache MetricValue `json:"cache"`
 }
 
+type StorageMetrics struct {
+	Name  string      `json:"name"`
+	Usage MetricValue `json:"usage"`
+	Free  MetricValue `json:"free"`
+	Used  MetricValue `json:"used"`
+}
+
+type StorageMetricsCouple struct {
+	Top StorageMetrics `json:"top"`
+	Bot StorageMetrics `json:"bot"`
+}
+
 type SystemMetrics struct {
-	Interfaces []InterfaceMetrics `json:"interfaces"`
-	Cpu        CpuMetrics         `json:"cpu"`
-	Memory     MemoryMetrics      `json:"memory"`
+	Interfaces []InterfaceMetrics     `json:"interfaces"`
+	Cpu        CpuMetrics             `json:"cpu"`
+	Memory     MemoryMetrics          `json:"memory"`
+	Storage    []StorageMetricsCouple `json:"storage"`
 }

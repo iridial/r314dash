@@ -9,7 +9,7 @@ r314dash is a lightweight, web-based dashboard interface designed to manage mult
 ## Features
 
 - **Multi-iframe Support**: Display multiple subpaths simultaneously using iframes, enabling quick switching between applications.
-- **Configurable Interface**: Customize the dashboard with a configurable `config.yaml` file, allowing for easy management of links and settings.
+- **Configurable Interface**: Customize the dashboard with a configurable `config.yaml` file, allowing for easy management of links and settings. Switch for light/dark mode.
 - **User Information Display**: If configured, the dashboard can show the current active user based on headers provided by the reverse proxy.
 - **Performance Stats (WIP)**: Future updates will include quick stats from a Prometheus instance, displaying CPU, RAM, Disk, and Network usage.
 - **Custom Assets**: Mount custom front-end assets, such as images, at the path `/static`.
@@ -23,7 +23,7 @@ The main components of the r314dash interface include:
    - Displays the site name (configurable).
    - Controls to reload, close, and open the currently selected iframe app in a new tab.
    - User menu to display the current active user (if configured).
-   - Future integration for displaying quick stats from Prometheus.
+   - Integration for displaying quick stats from Prometheus.
 
 2. **Side Navigation Bar**:
    - Contains links to activate the apps in their respective iframes.
@@ -47,7 +47,7 @@ The configuration for r314dash is managed through the `config.yaml` file. This f
 ### Example `config.yaml`
 
 ```yaml
-# TODO
+# TODO, in the meantime check out the repo config.yaml
 ```
 
 ### Acknowledgments
@@ -55,12 +55,17 @@ The configuration for r314dash is managed through the `config.yaml` file. This f
 r314dash was inspired by Organizr, aiming to provide a faster, more lightweight, and Kubernetes-friendly alternative.
 
 ### TODO
-    - doc:
-        - screenshot images
-        - deployment instructions
-        - config options
-    - app:
-        - actually working light/dark mode switch
-        - more efficient stats polling from prometheus
-        - better icon management, like dashy
-        - unit tests
+  - doc:
+    - screenshot images
+    - deployment instructions
+    - config options
+  - app:
+    - a better way to test stats display, without python script
+    - editable configmap: get current config + save new config in same configmap
+      - new view just to edit the config
+      - server side validation using the same parser of the config loader
+      - 2 edit modes: 1 to edit just the links, 1 to edit advanced stuff
+    - more efficient stats polling from prometheus
+    - more stats to show services status
+    - better icon management, like dashy
+    - unit tests

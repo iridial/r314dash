@@ -12,7 +12,7 @@ settings:
   stats:
     enabled: true
     #enabled: false
-    backend_url: "http://prometheus:9090/prometheus/api/v1/query"
+    backend_url: "http://localhost:9000/api/v1/query"
     refresh_interval: 5
     warn_values: # TODO: warn values thresholds
       cpu: 70
@@ -38,6 +38,21 @@ settings:
         query: "node_memory_MemAvailable_bytes"
       - label: "mem_cache" # memory used percentage
         query: "node_memory_Cached_bytes"
+      # for disk usage, label must have 3 sections: disk_[name in interface]_[metric_type]
+      # [metric_type] must me one of: usage, free, used
+      - label: "disk_sys_usage" # system disk used percentage
+        query: "100*(1-node_filesystem_avail_bytes{mountpoint='/'}/node_filesystem_size_bytes{mountpoint='/'})"
+      - label: "disk_sys_free" # system disk space free (bytes)
+        query: "node_filesystem_avail_bytes{mountpoint='/'}"
+      - label: "disk_sys_used" # system disk space used (bytes)
+        query: "node_filesystem_size_bytes{mountpoint='/'}-node_filesystem_avail_bytes{mountpoint='/'}"
+      - label: "disk_dat_usage" # system disk used percentage
+        query: "100*(1-node_filesystem_avail_bytes{mountpoint='/mnt/sata'}/node_filesystem_size_bytes{mountpoint='/mnt/sata'})"
+      - label: "disk_dat_free" # system disk space free (bytes)
+        query: "node_filesystem_avail_bytes{mountpoint='/mnt/sata'}"
+      - label: "disk_dat_used" # system disk space used (bytes)
+        query: "node_filesystem_size_bytes{mountpoint='/mnt/sata'}-node_filesystem_avail_bytes{mountpoint='/mnt/sata'}"
+
 
 # https://thehomelab.wiki/books/helpful-tools-resources/page/icons-for-self-hosted-dashboards
 # https://dashy.to/docs/icons/#home-lab-icons

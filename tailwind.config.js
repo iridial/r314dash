@@ -5,11 +5,13 @@ module.exports = {
     extend: {
       fontFamily: {
         sans: ["system-ui", "sans-serif"],
-        mono: ["system-ui", "monospace"],
-        serif: ["system-ui", "serif"],
+        mono: ["ui-monospace", "monospace"],
+        serif: ["ui-serif", "serif"],
       },
     },
   },
+  //darkMode: 'media',
+  darkMode: 'class',
   plugins: [],
   safelist: [
     'hidden',

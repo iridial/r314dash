@@ -1,40 +1,54 @@
 {{ range .Interfaces }}
-<div class="flex flex-col text-xs items-center ml-5">
+<div class="flex flex-col text-xs items-center ml-3">
     <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="size-5">
         <path stroke-linecap="round" stroke-linejoin="round" d="M3 7.5 7.5 3m0 0L12 7.5M7.5 3v13.5m13.5 0L16.5 21m0 0L12 16.5m4.5 4.5V7.5" />
     </svg>
     <span title="Network device: {{ .Interface }}">{{ .Interface }}</span>
 </div>
-<div class="flex flex-col text-sm ml-3 min-w-24">
-    <p title="Upload speed"><b>U</b>&nbsp;&nbsp;<span id="netup">{{ .Transmitted.Value }}</span></p>
-    <p title="Download speed"><b>D</b>&nbsp;&nbsp;<span id="netdown">{{ .Received.Value }}</span></p>
+<div class="flex flex-row text-sm ml-2 min-w-24">
+    <div class="grow">
+        <div title="Upload speed"><b>U</b></div>
+        <div title="Download speed"><b>D</b></div>
+    </div>
+    <div class="ml-2 text-right">
+        <div title="Upload speed">{{ .Transmitted.Value }}&nbsp;{{ .Transmitted.Unit }}</div>
+        <div title="Download speed">{{ .Received.Value }}&nbsp;{{ .Received.Unit }}</div>
+    </div>
 </div>
 {{ end }}
-{{ if .Cpu }}
-<div class="flex flex-col text-xs items-center ml-5">
+<div class="flex flex-col text-xs items-center ml-3">
     <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="size-6">
         <path stroke-linecap="round" stroke-linejoin="round" d="M8.25 3v1.5M4.5 8.25H3m18 0h-1.5M4.5 12H3m18 0h-1.5m-15 3.75H3m18 0h-1.5M8.25 19.5V21M12 3v1.5m0 15V21m3.75-18v1.5m0 15V21m-9-1.5h10.5a2.25 2.25 0 0 0 2.25-2.25V6.75a2.25 2.25 0 0 0-2.25-2.25H6.75A2.25 2.25 0 0 0 4.5 6.75v10.5a2.25 2.25 0 0 0 2.25 2.25Zm.75-12h9v9h-9v-9Z" />
     </svg>
-    <span title="Central Processing Unit">CPU</span>
 </div>
-<div class="flex flex-col text-sm ml-3">
-    <p title="CPU Usage" class="{{ if .Cpu.Usage.Warn }}text-yellow-500{{ end }}">&nbsp;<span id="cpu_usage">{{ .Cpu.Usage.Value }}</span>&percnt;</p>
-    <p>
-        &nbsp;{{ if .Cpu.Load1.Value }}<span id="cpu_load1">{{ .Cpu.Load1.Value }}</span>-{{ end }}<span id="cpu_load5" title="Load 5 min">{{ .Cpu.Load5.Value }}</span>-<span id="cpu_load15" title="Load 15 min">{{ .Cpu.Load15.Value }}</span>
-    </p>
+<div class="flex flex-row text-sm ml-2 min-w-20">
+    <div class="grow">
+        <div><b>CPU</b></div>
+        <div><b>RAM</b></div>
+    </div>
+    <div class="text-right">
+    {{ if .Cpu }}
+        <div title="CPU Usage - load1: {{ .Cpu.Load1.Value }} - load5: {{ .Cpu.Load5.Value }} - load15: {{ .Cpu.Load15.Value }}" class="{{ if .Cpu.Usage.Warn }}text-yellow-500{{ end }}">&nbsp;<span id="cpu_usage">{{ .Cpu.Usage.Value }}&nbsp;{{ .Cpu.Usage.Unit }}</div>
+    {{ end }}
+    {{ if .Memory }}
+        <div title="RAM Usage - free: {{ .Memory.Free.Value }}{{ .Memory.Free.Unit }} - cache: {{ .Memory.Cache.Value }}{{ .Memory.Cache.Unit }} - total: {{ .Memory.Total.Value }}{{ .Memory.Total.Unit }}">&nbsp;<span id="ram_usage">{{ .Memory.Usage.Value }}&nbsp;{{ .Memory.Usage.Unit }}</div>
+    {{ end }}
+    </div>
 </div>
-{{ end }}
-{{ if .Memory }}
-<div class="flex flex-col text-xs items-center ml-5">
+{{ range .Storage }}
+<div class="flex flex-col text-xs items-center ml-3">
     <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="size-6">
-        <path stroke-linecap="round" stroke-linejoin="round" d="M3.375 19.5h17.25m-17.25 0a1.125 1.125 0 0 1-1.125-1.125M3.375 19.5h7.5c.621 0 1.125-.504 1.125-1.125m-9.75 0V5.625m0 12.75v-1.5c0-.621.504-1.125 1.125-1.125m18.375 2.625V5.625m0 12.75c0 .621-.504 1.125-1.125 1.125m1.125-1.125v-1.5c0-.621-.504-1.125-1.125-1.125m0 3.75h-7.5A1.125 1.125 0 0 1 12 18.375m9.75-12.75c0-.621-.504-1.125-1.125-1.125H3.375c-.621 0-1.125.504-1.125 1.125m19.5 0v1.5c0 .621-.504 1.125-1.125 1.125M2.25 5.625v1.5c0 .621.504 1.125 1.125 1.125m0 0h17.25m-17.25 0h7.5c.621 0 1.125.504 1.125 1.125M3.375 8.25c-.621 0-1.125.504-1.125 1.125v1.5c0 .621.504 1.125 1.125 1.125m17.25-3.75h-7.5c-.621 0-1.125.504-1.125 1.125m8.625-1.125c.621 0 1.125.504 1.125 1.125v1.5c0 .621-.504 1.125-1.125 1.125m-17.25 0h7.5m-7.5 0c-.621 0-1.125.504-1.125 1.125v1.5c0 .621.504 1.125 1.125 1.125M12 10.875v-1.5m0 1.5c0 .621-.504 1.125-1.125 1.125M12 10.875c0 .621.504 1.125 1.125 1.125m-2.25 0c.621 0 1.125.504 1.125 1.125M13.125 12h7.5m-7.5 0c-.621 0-1.125.504-1.125 1.125M20.625 12c.621 0 1.125.504 1.125 1.125v1.5c0 .621-.504 1.125-1.125 1.125m-17.25 0h7.5M12 14.625v-1.5m0 1.5c0 .621-.504 1.125-1.125 1.125M12 14.625c0 .621.504 1.125 1.125 1.125m-2.25 0c.621 0 1.125.504 1.125 1.125m0 1.5v-1.5m0 0c0-.621.504-1.125 1.125-1.125m0 0h7.5" />
+        <path stroke-linecap="round" stroke-linejoin="round" d="M20.25 6.375c0 2.278-3.694 4.125-8.25 4.125S3.75 8.653 3.75 6.375m16.5 0c0-2.278-3.694-4.125-8.25-4.125S3.75 4.097 3.75 6.375m16.5 0v11.25c0 2.278-3.694 4.125-8.25 4.125s-8.25-1.847-8.25-4.125V6.375m16.5 0v3.75m-16.5-3.75v3.75m16.5 0v3.75C20.25 16.153 16.556 18 12 18s-8.25-1.847-8.25-4.125v-3.75m16.5 0c0 2.278-3.694 4.125-8.25 4.125s-8.25-1.847-8.25-4.125" />
     </svg>
-    <span title="Random Access Memory">RAM</span>
 </div>
-<div class="flex flex-col text-sm ml-3">
-    <p title="RAM Usage">&nbsp;<span id="ram_usage">{{ .Memory.Usage.Value }}</span>&percnt;</p>
-    <p title="Total memory">
-        &nbsp;<span id="mem_free" title="cache: {{ .Memory.Cache.Value }}, total: {{ .Memory.Total.Value }}">{{ .Memory.Free.Value }}</span> free
-    </p>
+<div class="flex flex-row text-sm ml-2 min-w-20">
+    <div class="grow">
+        <div><b>{{ .Top.Name }}</b></div>
+        <div><b>{{ .Bot.Name }}</b></div>
+    </div>
+    <div class="ml-2">
+        <div title="used: {{ .Top.Used.Value }} {{ .Top.Used.Unit }} - free: {{ .Top.Free.Value }} {{ .Top.Free.Unit }}">{{ .Top.Usage.Value }}&nbsp;{{ .Top.Usage.Unit }}</div>
+        <div title="used: {{ .Bot.Used.Value }} {{ .Bot.Used.Unit }} - free: {{ .Bot.Free.Value }} {{ .Bot.Free.Unit }}">{{ .Bot.Usage.Value }}&nbsp;{{ .Bot.Usage.Unit }}</div>
+    </div>
 </div>
 {{ end }}

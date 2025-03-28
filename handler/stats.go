@@ -12,13 +12,16 @@ import (
 	"text/template"
 )
 
-func ConvertBytes(bytes float64, time bool) string {
+func ConvertMetricBytes(bytes float64, time bool) model.MetricValue {
+	var metric model.MetricValue
+	// metric.Value = "GB"
 	const (
 		_  = iota
 		KB = 1 << (10 * iota) // 1 << 10 = 1024
 		MB
 		GB
 	)
+
 	var seconds string
 	if time {
 		seconds = "/s"
@@ -28,15 +31,17 @@ func ConvertBytes(bytes float64, time bool) string {
 
 	switch {
 	case bytes >= GB:
-		return fmt.Sprintf("%.2f GB%s", float64(bytes)/GB, seconds)
+		metric.Value = fmt.Sprintf("%.2f", float64(bytes)/GB)
+		metric.Unit = fmt.Sprintf("GB%s", seconds)
 	case bytes >= MB:
-		return fmt.Sprintf("%.2f MB%s", float64(bytes)/MB, seconds)
+		metric.Value = fmt.Sprintf("%.2f", float64(bytes)/MB)
+		metric.Unit = fmt.Sprintf("MB%s", seconds)
 	//case bytes >= KB:
 	default:
-		return fmt.Sprintf("%.2f KB%s", float64(bytes)/KB, seconds)
+		metric.Value = fmt.Sprintf("%.2f", float64(bytes)/KB)
+		metric.Unit = fmt.Sprintf("KB%s", seconds)
 	}
-	// default:
-	// 	return fmt.Sprintf("%d B%s", int(bytes), seconds)
+	return metric
 }
 
 func StatsHandler(w http.ResponseWriter, r *http.Request) {
@@ -83,6 +88,7 @@ func StatsHandler(w http.ResponseWriter, r *http.Request) {
 	interfacesMetricsMap := make(map[string]*model.InterfaceMetrics)
 	var cpuMetrics model.CpuMetrics
 	var memMetrics model.MemoryMetrics
+	storageMetricsMap := make(map[string]*model.StorageMetrics)
 
 	for _, result := range metricResponse.Data.Result {
 		device := result.Metric["device"]
@@ -95,18 +101,20 @@ func StatsHandler(w http.ResponseWriter, r *http.Request) {
 
 			if len(result.Value) == 2 {
 				if bytes, err := json.Number(result.Value[1].(string)).Float64(); err == nil {
-					humanReadableValue := ConvertBytes(bytes, true)
+					humanReadableValue := ConvertMetricBytes(bytes, true)
 					if metricType[1] == "receive" {
-						interfacesMetricsMap[device].Received.Value = humanReadableValue
+						interfacesMetricsMap[device].Received = humanReadableValue
 					} else if metricType[1] == "transmit" {
-						interfacesMetricsMap[device].Transmitted.Value = humanReadableValue
+						interfacesMetricsMap[device].Transmitted = humanReadableValue
 					}
 				}
 			} else {
 				if metricType[1] == "receive" {
 					interfacesMetricsMap[device].Received.Value = "-"
+					interfacesMetricsMap[device].Received.Unit = ""
 				} else if metricType[1] == "transmit" {
 					interfacesMetricsMap[device].Transmitted.Value = "-"
+					interfacesMetricsMap[device].Transmitted.Unit = ""
 				}
 			}
 			// TODO: if query_range endpoint is used, then return Values as [][]interface{}
@@ -115,6 +123,7 @@ func StatsHandler(w http.ResponseWriter, r *http.Request) {
 				humanReadableValue := fmt.Sprintf("%.2f", usg)
 				if metricType[1] == "usage" {
 					cpuMetrics.Usage.Value = humanReadableValue
+					cpuMetrics.Usage.Unit = "&percnt;"
 					//cpuMetrics.Usage.Warn = true
 				} else if metricType[1] == "load1" {
 					cpuMetrics.Load1.Value = humanReadableValue
@@ -128,21 +137,44 @@ func StatsHandler(w http.ResponseWriter, r *http.Request) {
 			if metricType[1] == "usage" {
 				if usg, err := json.Number(result.Value[1].(string)).Float64(); err == nil {
 					memMetrics.Usage.Value = fmt.Sprintf("%.2f", usg)
+					memMetrics.Usage.Unit = "&percnt;"
 				}
 			} else if bytes, err := json.Number(result.Value[1].(string)).Float64(); err == nil {
-				humanReadableValue := ConvertBytes(bytes, false)
+				humanReadableValue := ConvertMetricBytes(bytes, false)
 				if metricType[1] == "total" {
-					memMetrics.Total.Value = humanReadableValue
+					memMetrics.Total = humanReadableValue
 				} else if metricType[1] == "free" {
-					memMetrics.Free.Value = humanReadableValue
+					memMetrics.Free = humanReadableValue
 				} else if metricType[1] == "cache" {
-					memMetrics.Cache.Value = humanReadableValue
+					memMetrics.Cache = humanReadableValue
+				}
+			}
+		} else if metricType[0] == "disk" {
+			if len(metricType) != 3 {
+				fmt.Println("Invalid disk metric in response:", result.Metric["metric"])
+				continue
+			}
+			storageName := metricType[1]
+			if _, exists := storageMetricsMap[storageName]; !exists {
+				storageMetricsMap[storageName] = &model.StorageMetrics{Name: strings.ToUpper(storageName)}
+			}
+			if metricType[2] == "usage" {
+				if usg, err := json.Number(result.Value[1].(string)).Float64(); err == nil {
+					storageMetricsMap[storageName].Usage.Value = fmt.Sprintf("%.2f", usg)
+					storageMetricsMap[storageName].Usage.Unit = "&percnt;"
+				}
+			} else if bytes, err := json.Number(result.Value[1].(string)).Float64(); err == nil {
+				humanReadableValue := ConvertMetricBytes(bytes, false)
+				if metricType[2] == "free" {
+					storageMetricsMap[storageName].Free = humanReadableValue
+				} else if metricType[2] == "used" {
+					storageMetricsMap[storageName].Used = humanReadableValue
 				}
 			}
 		}
 	}
 
-	// for net interfaces, extract all device keys, sort them and create sorte array
+	// for net interfaces, extract all device keys, sort them and create sorted array
 	netdevs := make([]string, 0, len(interfacesMetricsMap))
 	for netdev := range interfacesMetricsMap {
 		netdevs = append(netdevs, netdev)
@@ -154,10 +186,30 @@ func StatsHandler(w http.ResponseWriter, r *http.Request) {
 		interfaceMetrics = append(interfaceMetrics, *interfacesMetricsMap[netdev])
 	}
 
+	// for disk metrics, pair 'em up
+	stornames := make([]string, 0, len(storageMetricsMap))
+	for storname := range storageMetricsMap {
+		stornames = append(stornames, storname)
+	}
+	sort.Strings(stornames)
+
+	var storageMetrics []model.StorageMetricsCouple
+	storidx := 0
+	for _, storname := range stornames {
+		if storidx < len(storageMetrics) {
+			storageMetrics[storidx].Bot = *storageMetricsMap[storname]
+			storidx++
+		} else {
+			// no index, i make a new one
+			storageMetrics = append(storageMetrics, model.StorageMetricsCouple{Top: *storageMetricsMap[storname]})
+		}
+	}
+
 	systemMetricsMap := model.SystemMetrics{
 		Interfaces: interfaceMetrics,
 		Cpu:        cpuMetrics,
 		Memory:     memMetrics,
+		Storage:    storageMetrics,
 	}
 
 	err = tmpl.Execute(w, systemMetricsMap)

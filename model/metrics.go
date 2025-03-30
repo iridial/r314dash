@@ -15,6 +15,7 @@ type MetricValue struct {
 	Value string `json:"value"`
 	Unit  string `json:"unit"`
 	Warn  bool   `json:"warn"`
+	Label string `json:"label"`
 }
 
 type InterfaceMetrics struct {
@@ -49,9 +50,16 @@ type StorageMetricsCouple struct {
 	Bot StorageMetrics `json:"bot"`
 }
 
+type MetricsCouple struct {
+	Top  MetricValue `json:"top"`
+	Bot  MetricValue `json:"bot"`
+	Show bool        `json:"show"`
+}
+
 type SystemMetrics struct {
-	Interfaces []InterfaceMetrics     `json:"interfaces"`
-	Cpu        CpuMetrics             `json:"cpu"`
-	Memory     MemoryMetrics          `json:"memory"`
-	Storage    []StorageMetricsCouple `json:"storage"`
+	Interfaces  []InterfaceMetrics     `json:"interfaces"`
+	Cpu         CpuMetrics             `json:"cpu"`
+	Memory      MemoryMetrics          `json:"memory"`
+	Storage     []StorageMetricsCouple `json:"storage"`
+	Temperature MetricsCouple          `json:"temperature"`
 }

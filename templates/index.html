@@ -56,7 +56,7 @@
         </button>
         <!-- <span class="">🌌</span> -->
     </div>
-    <nav id="sidenav" class="flex flex-col items-center flex-nowrap w-14 bg-zinc-100 dark:bg-zinc-900 pt-14">
+    <nav id="sidenav" class="flex flex-col items-center flex-nowrap shrink-0 w-14 bg-zinc-100 dark:bg-zinc-900 pt-14">
         {{range .Links}}
         {{ if .IsLink }}
         <a href="{{.Href}}" target="_blank" title="{{.Title}}">
@@ -168,10 +168,10 @@
                     <path stroke-linecap="round" stroke-linejoin="round" d="M14.25 9v6m-4.5 0V9M21 12a9 9 0 1 1-18 0 9 9 0 0 1 18 0Z" />
                 </svg>
             </div>
-            <div class="mr-4 flex flex row items-center content-center font-mono tracking-tight enabled" hx-get="/stats" hx-trigger="load delay:2s, dblclick, every {{ .StatsInterval }}s [this.classList.contains('enabled')]" id="stats"
-                title="Stats are polled every {{ .StatsInterval }}s, right click to pause polling. Manual refresh using double click."
-                _="on contextmenu toggle .enabled halt the event
-                then toggle .text-muted on me
+            <div class="stats-container enabled" hx-get="/stats" hx-trigger="load delay:2s, dblclick, every {{ .StatsInterval }}s [this.classList.contains('enabled')]" id="stats"
+                title="Stats are polled every {{ .StatsInterval }}s.&#013;Right click to pause polling.&#013;Double click to force refresh."
+                _="on contextmenu toggle .enabled on .stats-container halt the event
+                then toggle .text-muted on .stats-container
                 then toggle .hidden on #statspause
                 "
             >
@@ -179,9 +179,22 @@
                     <path stroke-linecap="round" stroke-linejoin="round" d="M9.813 15.904 9 18.75l-.813-2.846a4.5 4.5 0 0 0-3.09-3.09L2.25 12l2.846-.813a4.5 4.5 0 0 0 3.09-3.09L9 5.25l.813 2.846a4.5 4.5 0 0 0 3.09 3.09L15.75 12l-2.846.813a4.5 4.5 0 0 0-3.09 3.09ZM18.259 8.715 18 9.75l-.259-1.035a3.375 3.375 0 0 0-2.455-2.456L14.25 6l1.036-.259a3.375 3.375 0 0 0 2.455-2.456L18 2.25l.259 1.035a3.375 3.375 0 0 0 2.456 2.456L21.75 6l-1.035.259a3.375 3.375 0 0 0-2.456 2.456ZM16.894 20.567 16.5 21.75l-.394-1.183a2.25 2.25 0 0 0-1.423-1.423L13.5 18.75l1.183-.394a2.25 2.25 0 0 0 1.423-1.423l.394-1.183.394 1.183a2.25 2.25 0 0 0 1.423 1.423l1.183.394-1.183.394a2.25 2.25 0 0 0-1.423 1.423Z" />
                 </svg>
             </div>
+                {{ if .ShowVpn }}
+                <div class="stats-container enabled" hx-get="/stats?type=vpn" hx-trigger="load delay:2s, dblclick, every {{ .VpnInterval }}s [this.classList.contains('enabled')]" id="vpn"
+                    title="Stats are polled every {{ .VpnInterval }}s.&#013;Right click to pause polling.&#013;Double click to force refresh."
+                    _="on contextmenu toggle .enabled on .stats-container halt the event
+                    then toggle .text-muted on .stats-container
+                    then toggle .hidden on #statspause
+                    "
+                >
+                    <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="size-6 animate-pulse" title="Loading VPN status..">
+                        <path stroke-linecap="round" stroke-linejoin="round" d="M9.348 14.652a3.75 3.75 0 0 1 0-5.304m5.304 0a3.75 3.75 0 0 1 0 5.304m-7.425 2.121a6.75 6.75 0 0 1 0-9.546m9.546 0a6.75 6.75 0 0 1 0 9.546M5.106 18.894c-3.808-3.807-3.808-9.98 0-13.788m13.788 0c3.808 3.807 3.808 9.98 0 13.788M12 12h.008v.008H12V12Zm.375 0a.375.375 0 1 1-.75 0 .375.375 0 0 1 .75 0Z" />
+                    </svg>
+                </div>
+                {{ end }}
             {{ end }}
             {{ if .ShowUserManagement}}
-            <div class="mr-3">
+            <div class="p-3 ml-2">
                 <span>{{ .Fullname }}</span>
             </div>
             <div class="flex-none">

@@ -14,6 +14,13 @@ settings:
     #enabled: false
     backend_url: "http://localhost:9000/api/v1/query"
     refresh_interval: 5
+    # vpn stats provided by gluetun vpn conatiner
+    vpn:
+      enabled: false
+      #enabled: true
+      refresh_interval: 30 # in uset, uses the global stats interval
+      backend_url: "http://localhost:9000/vpn/v1/publicip/ip"
+      apikey: "gluetun"
     warn_values: # TODO: warn values thresholds
       cpu: 70
       mem: 80
@@ -52,7 +59,10 @@ settings:
         query: "node_filesystem_avail_bytes{mountpoint='/mnt/sata'}"
       - label: "disk_dat_used" # system disk space used (bytes)
         query: "node_filesystem_size_bytes{mountpoint='/mnt/sata'}-node_filesystem_avail_bytes{mountpoint='/mnt/sata'}"
-
+      - label: "temp_top_cpu" # system cpu temperature in celsius
+        query: "node_hwmon_temp_celsius{chip='thermal_thermal_zone0',sensor='temp1'}"
+      - label: "temp_bot_nvme" # system nvme drive temperature in celsius
+        query: "node_hwmon_temp_celsius{chip='nvme_nvme0',sensor='temp1'}"
 
 # https://thehomelab.wiki/books/helpful-tools-resources/page/icons-for-self-hosted-dashboards
 # https://dashy.to/docs/icons/#home-lab-icons

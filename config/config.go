@@ -68,5 +68,9 @@ func LoadConfig() error {
 		Main.Settings.Stats.RefreshInterval = 5
 	}
 
+	if Main.Settings.Stats.Vpn.RefreshInterval <= 0 {
+		Main.Settings.Stats.Vpn.RefreshInterval = Main.Settings.Stats.RefreshInterval
+	}
+
 	return nil
 }

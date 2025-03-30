@@ -46,6 +46,8 @@ func HomeHandler(w http.ResponseWriter, r *http.Request) {
 		SettingsUrl:        config.Main.Settings.SettingsUrl,
 		ShowStats:          config.Main.Settings.Stats.Enabled,
 		StatsInterval:      config.Main.Settings.Stats.RefreshInterval,
+		ShowVpn:            config.Main.Settings.Stats.Vpn.Enabled,
+		VpnInterval:        config.Main.Settings.Stats.Vpn.RefreshInterval,
 	}
 
 	err = tmpl.Execute(w, data)

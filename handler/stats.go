@@ -45,14 +45,70 @@ func ConvertMetricBytes(bytes float64, time bool) model.MetricValue {
 }
 
 func StatsHandler(w http.ResponseWriter, r *http.Request) {
-	// TODO: auth to prometheus
-	tmpl, err := template.ParseFiles("templates/stats.html")
-	if err != nil {
+	query := r.URL.Query()
+	reqStat := query.Get("type")
+	var tmpl *template.Template
+	var tmplerr error
+	var data any
+	var dataerr error
+	switch reqStat {
+	case "vpn":
+		data, dataerr = CollectVpnStatus()
+		tmpl, tmplerr = template.ParseFiles("templates/vpn.html")
+	default:
+		data, dataerr = CollectMetrics()
+		tmpl, tmplerr = template.ParseFiles("templates/metrics.html")
+	}
+	if dataerr != nil {
+		http.Error(w, dataerr.Error(), http.StatusInternalServerError)
+		return
+	}
+	if tmplerr != nil {
 		//http.Error(w, err.Error(), http.StatusInternalServerError)
-		fmt.Println("template load error:", err.Error())
+		fmt.Println("template load error:", tmplerr.Error())
 		http.Error(w, "<p>STATS TEMPLATE LOAD ERROR</p>", http.StatusInternalServerError)
 		return
 	}
+
+	err := tmpl.Execute(w, data)
+	if err != nil {
+		//http.Error(w, err.Error(), http.StatusInternalServerError)
+		fmt.Println("template exec error:", err.Error())
+		http.Error(w, "<p>STATS TEMPLATE EXEC ERROR</p>", http.StatusInternalServerError)
+	}
+}
+
+func CollectVpnStatus() (model.VpnConnection, error) {
+	req, err := http.NewRequest("GET", config.Main.Settings.Stats.Vpn.BackendUrl, nil)
+	if err != nil {
+		return model.VpnConnection{}, err
+	}
+	req.Header.Set("X-API-Key", config.Main.Settings.Stats.Vpn.ApiKey)
+	client := &http.Client{}
+	resp, err := client.Do(req)
+	if err != nil {
+		return model.VpnConnection{}, err
+	}
+	defer resp.Body.Close()
+	if resp.StatusCode != http.StatusOK {
+		return model.VpnConnection{}, fmt.Errorf("failed to fetch data: %s", resp.Status)
+	}
+	var vpnResponse model.VpnResponse
+	if err := json.NewDecoder(resp.Body).Decode(&vpnResponse); err != nil {
+		return model.VpnConnection{}, err
+	}
+
+	return model.VpnConnection{
+		Connected: len(vpnResponse.PublicIP) > 0,
+		PublicIP:  vpnResponse.PublicIP,
+		Region:    vpnResponse.Region,
+		Country:   vpnResponse.Country,
+		City:      vpnResponse.City,
+	}, nil
+}
+
+func CollectMetrics() (model.SystemMetrics, error) {
+	// TODO: auth to prometheus
 	//end := time.Now().Unix()
 	//start := end - 2 // match scraping time, get a single value
 	//time := time.Now().Unix()
@@ -70,25 +126,23 @@ func StatsHandler(w http.ResponseWriter, r *http.Request) {
 
 	resp, err := http.Get(queryURL)
 	if err != nil {
-		http.Error(w, "Failed to query Prometheus", http.StatusInternalServerError)
-		return
+		return model.SystemMetrics{}, fmt.Errorf("failed to query Prometheus")
 	}
 	defer resp.Body.Close()
 
 	var metricResponse model.MetricResponse
 	if err := json.NewDecoder(resp.Body).Decode(&metricResponse); err != nil {
-		http.Error(w, "Failed to decode Prometheus response", http.StatusInternalServerError)
-		return
+		return model.SystemMetrics{}, fmt.Errorf("failed to decode Prometheus response")
 	}
 	if metricResponse.Status != "success" {
-		http.Error(w, "Prometheus query failed", http.StatusInternalServerError)
-		return
+		return model.SystemMetrics{}, fmt.Errorf("frometheus query failed")
 	}
 
 	interfacesMetricsMap := make(map[string]*model.InterfaceMetrics)
 	var cpuMetrics model.CpuMetrics
 	var memMetrics model.MemoryMetrics
 	storageMetricsMap := make(map[string]*model.StorageMetrics)
+	var temperatureMetrics model.MetricsCouple
 
 	for _, result := range metricResponse.Data.Result {
 		device := result.Metric["device"]
@@ -171,6 +225,21 @@ func StatsHandler(w http.ResponseWriter, r *http.Request) {
 					storageMetricsMap[storageName].Used = humanReadableValue
 				}
 			}
+		} else if metricType[0] == "temp" {
+			tempLabel := metricType[2]
+			if temp, err := json.Number(result.Value[1].(string)).Float64(); err == nil {
+				tempMetricValue := model.MetricValue{
+					Label: strings.ToUpper(tempLabel),
+					Value: fmt.Sprintf("%.2f", temp),
+					Unit:  "&deg;C",
+				}
+				if metricType[1] == "top" {
+					temperatureMetrics.Top = tempMetricValue
+				} else if metricType[1] == "bot" {
+					temperatureMetrics.Bot = tempMetricValue
+				}
+				temperatureMetrics.Show = true
+			}
 		}
 	}
 
@@ -205,17 +274,11 @@ func StatsHandler(w http.ResponseWriter, r *http.Request) {
 		}
 	}
 
-	systemMetricsMap := model.SystemMetrics{
-		Interfaces: interfaceMetrics,
-		Cpu:        cpuMetrics,
-		Memory:     memMetrics,
-		Storage:    storageMetrics,
-	}
-
-	err = tmpl.Execute(w, systemMetricsMap)
-	if err != nil {
-		//http.Error(w, err.Error(), http.StatusInternalServerError)
-		fmt.Println("template exec error:", err.Error())
-		http.Error(w, "<p>STATS TEMPLATE EXEC ERROR</p>", http.StatusInternalServerError)
-	}
+	return model.SystemMetrics{
+		Interfaces:  interfaceMetrics,
+		Cpu:         cpuMetrics,
+		Memory:      memMetrics,
+		Storage:     storageMetrics,
+		Temperature: temperatureMetrics,
+	}, nil
 }

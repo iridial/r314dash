@@ -9,6 +9,8 @@ class RequestHandler(BaseHTTPRequestHandler):
         parsed_path = urlparse(self.path)
         if parsed_path.path == '/api/v1/query':
             self.handle_query(parsed_path.query)
+        elif parsed_path.path == '/vpn/v1/publicip/ip':
+            self.handle_vpn()
         elif parsed_path.path == '/api/v1/status':
             self.handle_status()
         else:
@@ -19,6 +21,25 @@ class RequestHandler(BaseHTTPRequestHandler):
         try:
             # Load data from the JSON file
             with open('devstats.json', 'r') as file:
+                data = json.load(file)
+
+            # Parse query parameters
+            #query_params = parse_qs(query)
+            #sleep(3)
+
+            self.send_response(200)
+            self.send_header('Content-Type', 'application/json')
+            self.end_headers()
+            self.wfile.write(json.dumps(data).encode('utf-8'))
+        except Exception as e:
+            self.send_response(500)
+            self.end_headers()
+            self.wfile.write(f'Error reading file: {str(e)}'.encode('utf-8'))
+
+    def handle_vpn(self):
+        try:
+            # Load data from the JSON file
+            with open('devvpn.json', 'r') as file:
                 data = json.load(file)
 
             # Parse query parameters

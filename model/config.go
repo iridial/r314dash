@@ -24,6 +24,14 @@ type Stats struct {
 	BackendUrl      string   `yaml:"backend_url"`
 	RefreshInterval int16    `yaml:"refresh_interval"`
 	Metrics         []Metric `yaml:"metrics"`
+	Vpn             Vpn      `yaml:"vpn"`
+}
+
+type Vpn struct {
+	Enabled         bool   `yaml:"enabled"`
+	BackendUrl      string `yaml:"backend_url"`
+	ApiKey          string `yaml:"api_key"`
+	RefreshInterval int16  `yaml:"refresh_interval"`
 }
 
 // label format: "net_" for network resources, "cpu_", "mem_"

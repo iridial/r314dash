@@ -67,5 +67,6 @@ r314dash was inspired by Organizr, aiming to provide a faster, more lightweight,
       - 2 edit modes: 1 to edit just the links, 1 to edit advanced stuff
     - more efficient stats polling from prometheus
     - more stats to show services status
+    - customizable navbars location
     - better icon management, like dashy
     - unit tests

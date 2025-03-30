@@ -16,4 +16,6 @@ type Homepage struct {
 	SettingsUrl        string
 	ShowStats          bool
 	StatsInterval      int16
+	ShowVpn            bool
+	VpnInterval        int16
 }

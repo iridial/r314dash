@@ -30,4 +30,7 @@
     #homebtn.noui:hover {
         transform: translate(0px, 0px);
     }
+    .stats-container {
+        @apply flex items-center content-center font-mono tracking-tight
+    }
 }

@@ -1,4 +1,13 @@
 @import "tailwindcss";
+@source "../templates/*.html";
+
+@theme {
+  --font-sans: system-ui, sans-serif;
+  --font-mono: ui-monospace, monospace;
+  --font-serif: ui-serif, serif;
+}
+
+@variant dark (&:where(.dark, .dark *));
 
 @layer components {
     .btn {

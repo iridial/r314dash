@@ -3,7 +3,7 @@ root = "."
 tmp_dir = "tmp"
 
 [build]
-bin = "tmp/main" # Path to the binary
+entrypoint = "tmp/main" # Path to the binary
 cmd = "go build -o tmp/main ." # Command to build the binary
 #cmd = "go build -o tmp/main.exe ." # Command to build the binary
 include_ext = ["go", "html", "yaml"] # File extensions to watch

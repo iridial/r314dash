@@ -19,7 +19,7 @@ COPY . .
 RUN CGO_ENABLED=0 GOOS=linux go build -o r314dash .
 
 # Use a Node.js image to build Tailwind CSS
-FROM node:16 AS tailwind-builder
+FROM node:22 AS tailwind-builder
 
 # Set the Current Working Directory inside the container
 WORKDIR /app

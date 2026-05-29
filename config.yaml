@@ -10,8 +10,8 @@ settings:
   sign_out_url: "/oauth2/sign_out"
   settings_url: "/user/settings"
   stats:
-    enabled: true
-    #enabled: false
+    #enabled: true
+    enabled: false
     backend_url: "http://localhost:9000/api/v1/query"
     refresh_interval: 5
     # vpn stats provided by gluetun vpn conatiner
@@ -20,7 +20,7 @@ settings:
       #enabled: true
       refresh_interval: 30 # in uset, uses the global stats interval
       backend_url: "http://localhost:9000/vpn/v1/publicip/ip"
-      apikey: "gluetun"
+      api_key: "gluetun"
     warn_values: # TODO: warn values thresholds
       cpu: 70
       mem: 80
